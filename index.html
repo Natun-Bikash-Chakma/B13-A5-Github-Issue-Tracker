@@ -2,30 +2,109 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>GitHub Issues - Login</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Issues Tracker - Sign In</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        /* Smooth fade for the modal */
+        #errorModal {
+            transition: opacity 0.3s ease;
+        }
+        .hidden-modal {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .show-modal {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 class="text-2xl font-bold mb-6 text-center">Sign In</h2>
-        <form id="loginForm" class="space-y-4">
-            <input type="text" id="username" placeholder="Username" class="w-full p-2 border rounded" required>
-            <input type="password" id="password" placeholder="Password" class="w-full p-2 border rounded" required>
-            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded">Login</button>
-        </form>
-        <p class="mt-4 text-sm text-gray-600">Demo: admin / admin123</p>
+<body class="bg-[#f8f9fa] flex items-center justify-center min-h-screen p-4">
+    <!-- Error Modal (Hidden by default) -->
+    <div id="errorModal" class="hidden-modal fixed inset-0 flex items-center justify-center z-50 px-4">
+        <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm"></div>
+        <div
+            class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-sm relative z-10 border border-red-100 scale-100 transition-transform">
+            <div class="flex items-center justify-center w-12 h-12 bg-red-100 text-red-600 rounded-full mx-auto mb-4">
+                <svg xmlns="http://www.w3.org" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h3 class="text-center text-lg font-bold text-gray-800">Access Denied</h3>
+            <p class="text-center text-sm text-gray-500 mt-2 mb-6">Invalid credentials. Please use the demo login
+                credentials provided below.</p>
+            <button id="closeBtn"
+                class="w-full bg-gray-800 text-white py-2 rounded-lg font-medium hover:bg-black transition">Try
+                Again</button>
+        </div>
     </div>
+    <!-- Main Card -->
+    <div class="bg-white p-8 rounded-lg shadow-sm border border-gray-100 w-full max-w-[450px]">
+        <!-- Header -->
+        <header class="flex flex-col items-center mb-8">
+            <img src="./assets/github-logo.png" alt="GitHub Logo" class="w-16 h-16 mb-4">
+            <h2 class="text-xl font-semibold text-gray-800">GitHub Issues Tracker</h2>
+            <p class="text-sm text-gray-500 mt-1">Sign in to manage your issues</p>
+        </header>
+        <!-- Form -->
+        <form id="loginForm" class="space-y-6">
+            <!-- Username -->
+            <div class="flex flex-col">
+                <label for="username" class="text-sm font-medium text-gray-700 mb-2">Username</label>
+                <input type="text" id="username" placeholder="Enter Username"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+                <span class="text-[12px] text-purple-600 mt-1">Default: admin</span>
+            </div>
+            <!-- Password -->
+            <div class="flex flex-col">
+                <label for="password" class="text-sm font-medium text-gray-700 mb-2">Password</label>
+                <input type="password" id="password" placeholder="Enter Password"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+                <span class="text-[12px] text-purple-600 mt-1">Default: admin123</span>
+            </div>
+            <!-- Submit Button -->
+            <button type="submit"
+                class="w-full bg-[#4c00ff] hover:bg-[#3f00d6] text-white font-semibold py-2.5 rounded-md transition duration-200">
+                Sign In
+            </button>
+        </form>
+        <!-- Divider -->
+        <div class="relative flex items-center my-8">
+            <div class="flex-grow border-t border-gray-200"></div>
+            <span class="flex-shrink mx-4 text-xs text-gray-400 uppercase font-bold">OR</span>
+            <div class="flex-grow border-t border-gray-200"></div>
+        </div>
+        <!-- Demo Credentials -->
+        <div class="text-center">
+            <p class="text-[11px] text-gray-400 uppercase tracking-wider mb-3">Demo Credentials:</p>
+            <div class="bg-[#fbfcfe] p-4 rounded-md border border-gray-50">
+                <p class="text-sm text-gray-700"><strong>Username:</strong> admin</p>
+                <p class="text-sm text-gray-700"><strong>Password:</strong> admin123</p>
+            </div>
+        </div>
+    </div>
+    <!-- Vanilla JS for basic interaction -->
     <script>
+        const modal = document.getElementById('errorModal');
+        const closeBtn = document.getElementById('closeBtn');
         document.getElementById('loginForm').addEventListener('submit', function (e) {
             e.preventDefault();
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
-            
             if (user === 'admin' && pass === 'admin123') {
                 window.location.href = 'main.html';
             } else {
-                alert('Invalid credentials');
+                // Show the custom modal
+                modal.classList.remove('hidden-modal');
+                modal.classList.add('show-modal');
             }
+        });
+        // Close modal logic
+        closeBtn.addEventListener('click', () => {
+            modal.classList.remove('show-modal');
+            modal.classList.add('hidden-modal');
         });
     </script>
 </body>
