@@ -236,9 +236,101 @@
             </div>
         </div>
          `;
-                    grid.insertAdjacentHTML('beforeend', card);
-                });
-                // renderIssues END
+            grid.insertAdjacentHTML('beforeend', card);
+            });
+            // renderIssues END
+        document.getElementById('totalCount').innerText = `${data.length} Issues`;
+                lucide.createIcons();
+            }, 600);
+        }
+        function changeTab(status) {
+            activeFilter = status;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-[#4c00ff]', 'text-white');
+                btn.classList.add('text-gray-500');
+            });
+            document.getElementById(`tab-${status}`).classList.add('bg-[#4c00ff]', 'text-white');
+            document.getElementById(`tab-${status}`).classList.remove('text-gray-500');
+            const filtered = status === 'all' ? issues : issues.filter(i => i.status === status);
+            renderIssues(filtered);
+        }
+        // Labels and priority badges.popup start
+        function openModal(id) {
+            const item = mockData.find(task => task.id === id);
+            if (!item) return;
+            // 1. DYNAMIC BORDER COLOR (Matching the Image)
+            const modalContent = document.querySelector('#detailModal > div'); // Select the white card
+            const isOpened = item.status.toLowerCase() === 'open';
+            // Reset classes and add the top border thickness
+            modalContent.className = "bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border-t-[6px] transition-all transform scale-100";
+            // Apply specific color: Green (#22c55e) or Purple (#a855f7)
+            modalContent.classList.add(isOpened ? 'border-[#22c55e]' : 'border-[#a855f7]');
+            // 2. Core Content
+            document.getElementById('mTitle').textContent = item.title;
+            document.getElementById('mDesc').textContent = item.desc;
+            document.getElementById('mAuthor').textContent = item.author.toUpperCase();
+            document.getElementById('mDate').textContent = item.createdAt;
+            document.getElementById('mAssignee').textContent = item.assignee || "NONE";
+            // 3. Status Badge (Green/Purple pill inside modal)
+            const statusEl = document.getElementById('mStatusBadge');
+            statusEl.className = `px-3 py-1 rounded-full font-bold flex items-center gap-1.5 text-white text-[10px] ${isOpened ? 'bg-[#22c55e]' : 'bg-[#a855f7]'}`;
+            statusEl.innerHTML = `<span class="w-1.5 h-1.5 bg-white rounded-full"></span> ${item.status.toUpperCase()}`;
+            // 4. Labels (Added icons + Exact image colors)
+            const labelContainer = document.querySelector('.flex.gap-2.mb-6');
+            labelContainer.innerHTML = item.labels.map(label => {
+                const text = label.toLowerCase();
+                let style = "";
+                let icon = "";
+                if (text.includes('bug')) {
+                    style = "bg-[#fff0f0] text-[#ff5c5c] border-[#ffd6d6]";
+                } else if (text.includes('help')) {
+                    style = "bg-[#fff4eb] text-[#ff8a35] border-[#ffe0cc]";
+                } else if (text.includes('enhancement')) {
+                    style = "bg-[#ebfaf2] text-[#00c070] border-[#d1f5e3]";
+                } else if (text.includes('first')) {
+                    style = "bg-[#f0f2ff] text-[#6366f1] border-[#e0e4ff]";
+                } else if (text.includes('doc')) {
+                    style = "bg-[#f0f7ff] text-[#0070f3] border-[#d1e9ff]";
+                }
+                return `<span class="${style} px-2.5 py-1 rounded border text-[10px] font-black uppercase flex items-center gap-1.5">
+            <span class="text-[12px]">${icon}</span> ${label}
+        </span>`;
+            }).join('');
+            // 5. Priority Badge (Light background / Solid text)
+            const priorityEl = document.getElementById('mPriorityBadge');
+            const p = item.priority.toLowerCase();
+            let pStyle = "";
+            if (p === 'high') {
+                pStyle = "bg-[#fff0f0] text-[#ff5c5c]";
+            } else if (p === 'medium') {
+                pStyle = "bg-[#fff8e6] text-[#ffb800]";
+            } else {
+                pStyle = "bg-[#f4f6f8] text-[#919eab]";
+            }
+            priorityEl.className = `${pStyle} px-6 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider`;
+            priorityEl.textContent = item.priority;
+            // 6. Display Modal
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+        function closeModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+        }
+        // END
+        // Optional: Close modal when clicking outside the box
+        document.getElementById('detailModal').addEventListener('click', function (e) {
+            if (e.target === this) closeModal();
+        });
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filtered = issues.filter(i =>
+                (activeFilter === 'all' || i.status === activeFilter) &&
+                (i.title.toLowerCase().includes(query) || i.desc.toLowerCase().includes(query))
+            );
+            renderIssues(filtered);
+        });
+        // Initial Load
+        renderIssues(issues);
+        lucide.createIcons();
     </script>
 </body>
 </html>
