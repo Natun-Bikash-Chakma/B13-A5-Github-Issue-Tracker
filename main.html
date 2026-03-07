@@ -156,6 +156,89 @@
         </div>
     </div>
     <!-- Details Modal POPUP End-->
-    
+    <script>
+        const mockData = [
+            { id: 1, title: "Fix Navigation Menu On Mobile Devices", desc: "The navigation menu doesn't collapse properly on mobile devices. Need to fix the responsive behavior.", status: "open", labels: ["🐞 bug", "♻ help wanted"], priority: "high", author: "john_doe", assignee: "jane_smith", createdAt: "2024-01-15", updatedAt: "2024-01-15" },
+            { id: 2, title: "Add dark mode support", desc: "Users are requesting a dark mode option. This would improve accessibility and user experience.", status: "open", labels: ["🌟 enhancement", "🤗 good first issued"], priority: "medium", author: "sarah_dev", assignee: "", createdAt: "2024-01-14", updatedAt: "2024-01-16" },
+            { id: 3, title: "Update README with installation instructions", desc: "The README file needs better installation instructions for new contributors.", status: "closed", labels: ["📚 documentation"], priority: "low", author: "mike_docs", assignee: "sarah_dev", createdAt: "2024-01-10", updatedAt: "2024-01-12" },
+            { id: 4, title: "Performance issues with large datasets", desc: "Application becomes slow when loading more than 1000 items. Need to implement pagination or virtual scrolling.", status: "open", labels: ["🐞 bug", "🌟 enhancement"], priority: "high", author: "alex_perf", assignee: "john_doe", createdAt: "2024-01-18", updatedAt: "2024-01-18" },
+        ];
+        // Duplicating data for visual effect
+        //let issues = [...mockData, ...mockData, ...mockData, ...mockData];
+        //Real Data 
+        let issues = [...mockData];
+        let activeFilter = 'all';
+        function renderIssues(data) {
+            const grid = document.getElementById('issueGrid');
+            const loading = document.getElementById('loading');
+            grid.innerHTML = '';
+            grid.classList.add('hidden');
+            loading.classList.remove('hidden');
+            setTimeout(() => {
+                loading.classList.add('hidden');
+                grid.classList.remove('hidden');
+                // renderIssues Start
+                data.forEach(item => {
+                    const isClosed = item.status === 'closed';
+                    // 1. Status Icon Logic
+                    const statusImg = isClosed ? './assets/Closed-Status.png' : './assets/Open-Status.png';
+                    const statusBg = isClosed ? 'bg-purple-50' : 'bg-green-50';
+                    // 2. Priority Badge Colors
+                    let pBg = '', pText = '';
+                    const p = item.priority.toLowerCase();
+                    if (p === 'high') { pBg = 'bg-[#fff0f0] border-[#ffe0e0]'; pText = 'text-[#ff5c5c]'; }
+                    else if (p === 'medium') { pBg = 'bg-[#fff9e6] border-[#fff2cc]'; pText = 'text-[#f0b400]'; }
+                    else { pBg = 'bg-[#f0f2f5] border-[#e1e4e8]'; pText = 'text-[#6a737d]'; }
+                    // 3. Dynamic Labels Logic (Handles the Array)
+                    const labelsHtml = item.labels.map(label => {
+                        const l = label.toLowerCase();
+                        let color = 'bg-gray-50 text-gray-500 border-gray-100'; // Default
+
+                        if (l.includes('bug')) color = 'bg-red-50 text-red-500 border-red-100';
+                        if (l.includes('enhancement')) color = 'bg-emerald-50 text-emerald-500 border-emerald-100';
+                        if (l.includes('documentation')) color = 'bg-blue-50 text-blue-500 border-blue-100';
+                        if (l.includes('help wanted')) color = 'bg-orange-50 text-orange-500 border-orange-100';
+                        if (l.includes('good first issued')) color = 'bg-indigo-50 text-indigo-500 border-indigo-100';
+                        return `<span class="${color} text-[9px] font-black px-2.5 py-1 rounded-full border flex items-center uppercase tracking-wider">${label}</span>`;
+                    }).join('');
+                    const card = `
+        <div onclick="openModal(${item.id})" class="bg-white rounded-xl shadow-sm border-t-4 ${isClosed ? 'border-purple-600' : 'border-green-500'} p-5 hover:shadow-md transition cursor-pointer flex flex-col justify-between group h-full">
+            <div>
+                <!-- Top Section -->
+                <div class="flex items-center justify-between mb-5">
+                    <div class="w-8 h-8 flex items-center justify-center rounded-full ${statusBg}">
+                        <img src="${statusImg}" alt="status" class="w-5 h-5 object-contain">
+                    </div>
+                    <div class="px-5 py-1 rounded-full border ${pBg}">
+                        <span class="text-[10px] font-black tracking-wider uppercase ${pText}">
+                            ${item.priority}
+                        </span>
+                    </div>
+                </div>
+                <h4 class="font-bold text-sm text-gray-800 mb-2 group-hover:text-indigo-600 transition">${item.title}</h4>
+                <p class="text-[11px] text-gray-400 line-clamp-2 mb-4 leading-relaxed">${item.desc}</p>
+                
+                <!-- Multi-Labels Section -->
+                <div class="flex flex-wrap gap-2 mb-4">
+                    ${labelsHtml}
+                </div>
+            </div>
+            <!-- Footer Section -->
+            <div class="pt-4 border-t border-gray-100 flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-tighter leading-tight">
+                <div class="flex flex-col gap-1">
+                    <span>#${item.id} by ${item.author}</span>
+                    <span class="text-gray-400/80 italic font-medium">Assignee: ${item.assignee || 'none'}</span>
+                </div>
+                <div class="flex flex-col gap-1 text-right items-end">
+                    <span>Created: ${item.createdAt}</span>
+                    <span class="text-gray-400/80 font-medium">Updated: ${item.updatedAt}</span>
+                </div>
+            </div>
+        </div>
+         `;
+                    grid.insertAdjacentHTML('beforeend', card);
+                });
+                // renderIssues END
+    </script>
 </body>
 </html>
