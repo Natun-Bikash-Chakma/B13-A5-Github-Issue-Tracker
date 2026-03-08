@@ -86,18 +86,27 @@
 
 - Create a readme file and answer this question on your own. Don’t copy-paste from Google or any AI chatbot. 
     - 1️⃣ What is the difference between var, let, and const?
+    - 
           var: Function-scoped, hoisted, re-declarable (Avoid).
           let: Block-scoped, re-assignable.
           const: Block-scoped, immutable reference (Must initialize).
+      
     - 2️⃣ What is the spread operator (...)?
+  
           Unpacks iterable elements (arrays/objects) into separate arguments or new collections.
+      
     - 3️⃣ What is the difference between map(), filter(), and forEach()?
+    - 
           map(): Returns new array by transforming every element.
           filter(): Returns new array with elements matching a condition.
           forEach(): Executes a callback; returns undefined (Just a loop).
+      
     - 4️⃣ What is an arrow function?
+    - 
           Concise () => syntax; lexically binds this (inherits from parent scope).
+      
     - 5️⃣ What are template literals?
+    - 
           Backtick strings (`) supporting interpolation (${}) and multi-line text.
 
 
