@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GitHub Issues Tracker - Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         .loader {
             border-top-color: #4c00ff;
@@ -216,208 +216,195 @@
         //Real Data 
         let issues = [...mockData];
         let activeFilter = 'all';
+        // Data rendering with loading animation
         function renderIssues(data) {
             const grid = document.getElementById('issueGrid');
             const loading = document.getElementById('loading');
+            const totalCount = document.getElementById('totalCount');
             grid.innerHTML = '';
             grid.classList.add('hidden');
             loading.classList.remove('hidden');
             setTimeout(() => {
                 loading.classList.add('hidden');
                 grid.classList.remove('hidden');
-                // renderIssues Start
+                // Show empty state if no data
+                if (data.length === 0) {
+                    grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-400 italic">No issues found.</div>`;
+                }
                 data.forEach(item => {
-                    const isClosed = item.status === 'closed';
-                    // 1. Status Icon Logic
+                    const isClosed = item.status.toLowerCase() === 'closed';
                     const statusImg = isClosed ? './assets/Closed-Status.png' : './assets/Open-Status.png';
                     const statusBg = isClosed ? 'bg-purple-50' : 'bg-green-50';
-                    // 2. Priority Badge Colors
+                    // Priority styling logic
                     let pBg = '', pText = '';
                     const p = item.priority.toLowerCase();
                     if (p === 'high') { pBg = 'bg-[#fff0f0] border-[#ffe0e0]'; pText = 'text-[#ff5c5c]'; }
                     else if (p === 'medium') { pBg = 'bg-[#fff9e6] border-[#fff2cc]'; pText = 'text-[#f0b400]'; }
                     else { pBg = 'bg-[#f0f2f5] border-[#e1e4e8]'; pText = 'text-[#6a737d]'; }
-                    // 3. Dynamic Labels Logic (Handles the Array)
+                    // Label color mapping
                     const labelsHtml = item.labels.map(label => {
                         const l = label.toLowerCase();
-                        let color = 'bg-gray-50 text-gray-500 border-gray-100'; // Default
-
+                        let color = 'bg-gray-50 text-gray-500 border-gray-100';
                         if (l.includes('bug')) color = 'bg-red-50 text-red-500 border-red-100';
-                        if (l.includes('enhancement')) color = 'bg-emerald-50 text-emerald-500 border-emerald-100';
-                        if (l.includes('documentation')) color = 'bg-blue-50 text-blue-500 border-blue-100';
-                        if (l.includes('help wanted')) color = 'bg-orange-50 text-orange-500 border-orange-100';
-                        if (l.includes('good first issued')) color = 'bg-indigo-50 text-indigo-500 border-indigo-100';
+                        else if (l.includes('enhancement')) color = 'bg-emerald-50 text-emerald-500 border-emerald-100';
+                        else if (l.includes('documentation')) color = 'bg-blue-50 text-blue-500 border-blue-100';
+                        else if (l.includes('help')) color = 'bg-orange-50 text-orange-500 border-orange-100';
+                        else if (l.includes('first')) color = 'bg-indigo-50 text-indigo-500 border-indigo-100';
                         return `<span class="${color} text-[9px] font-black px-2.5 py-1 rounded-full border flex items-center uppercase tracking-wider">${label}</span>`;
                     }).join('');
+                    // Card HTML structure
                     const card = `
-        <div onclick="openModal(${item.id})" class="bg-white rounded-xl shadow-sm border-t-4 ${isClosed ? 'border-purple-600' : 'border-green-500'} p-5 hover:shadow-md transition cursor-pointer flex flex-col justify-between group h-full">
-            <div>
-                <!-- Top Section -->
-                <div class="flex items-center justify-between mb-5">
-                    <div class="w-8 h-8 flex items-center justify-center rounded-full ${statusBg}">
-                        <img src="${statusImg}" alt="status" class="w-5 h-5 object-contain">
+                <div onclick="openModal(${item.id})" class="bg-white rounded-xl shadow-sm border-t-4 ${isClosed ? 'border-purple-600' : 'border-green-500'} p-5 hover:shadow-md transition cursor-pointer flex flex-col justify-between group h-full">
+                    <div>
+                        <div class="flex items-center justify-between mb-5">
+                            <div class="w-8 h-8 flex items-center justify-center rounded-full ${statusBg}">
+                                <img src="${statusImg}" alt="status" class="w-5 h-5 object-contain">
+                            </div>
+                            <div class="px-5 py-1 rounded-full border ${pBg}">
+                                <span class="text-[10px] font-black tracking-wider uppercase ${pText}">${item.priority}</span>
+                            </div>
+                        </div>
+                        <h4 class="font-bold text-sm text-gray-800 mb-2 group-hover:text-indigo-600 transition">${item.title}</h4>
+                        <p class="text-[11px] text-gray-400 line-clamp-2 mb-4 leading-relaxed">${item.desc}</p>
+                        <div class="flex flex-wrap gap-2 mb-4">${labelsHtml}</div>
                     </div>
-                    <div class="px-5 py-1 rounded-full border ${pBg}">
-                        <span class="text-[10px] font-black tracking-wider uppercase ${pText}">
-                            ${item.priority}
-                        </span>
+                    <div class="pt-4 border-t border-gray-100 flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-tighter leading-tight">
+                        <div class="flex flex-col gap-1">
+                            <span>#${item.id} by ${item.author}</span>
+                            <span class="text-gray-400/80 italic font-medium">Assignee: ${item.assignee || 'none'}</span>
+                        </div>
+                        <div class="flex flex-col gap-1 text-right items-end">
+                            <span>Created: ${item.createdAt}</span>
+                            <span>Updated: ${item.updatedAt}</span>
+                        </div>
                     </div>
-                </div>
-                <h4 class="font-bold text-sm text-gray-800 mb-2 group-hover:text-indigo-600 transition">${item.title}</h4>
-                <p class="text-[11px] text-gray-400 line-clamp-2 mb-4 leading-relaxed">${item.desc}</p>
-                
-                <!-- Multi-Labels Section -->
-                <div class="flex flex-wrap gap-2 mb-4">
-                    ${labelsHtml}
-                </div>
-            </div>
-            <!-- Footer Section -->
-            <div class="pt-4 border-t border-gray-100 flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-tighter leading-tight">
-                <div class="flex flex-col gap-1">
-                    <span>#${item.id} by ${item.author}</span>
-                    <span class="text-gray-400/80 italic font-medium">Assignee: ${item.assignee || 'none'}</span>
-                </div>
-                <div class="flex flex-col gap-1 text-right items-end">
-                    <span>Created: ${item.createdAt}</span>
-                    <span class="text-gray-400/80 font-medium">Updated: ${item.updatedAt}</span>
-                </div>
-            </div>
-        </div>
-         `;
-                grid.insertAdjacentHTML('beforeend', card);
+                </div>`;
+                    grid.insertAdjacentHTML('beforeend', card);
                 });
-                // renderIssues END
-                document.getElementById('totalCount').innerText = `${data.length} Issues`;
-                lucide.createIcons();
-            }, 600);
+                // Update count and re-init icons
+                if (totalCount) totalCount.innerText = `${data.length} Issues`;
+                if (window.lucide) lucide.createIcons();
+            }, 300);
         }
+        // Update Tab UI active states
+        function updateTabUI() {
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => {
+                const tabName = tab.textContent.trim().toLowerCase();
+                tab.classList.remove('bg-[#4c00ff]', 'bg-green-600', 'bg-purple-600', 'text-white', 'font-bold');
+                tab.classList.add('bg-white', 'text-gray-500', 'font-semibold');
+                if (tabName === activeFilter.toLowerCase()) {
+                    tab.classList.remove('bg-white', 'text-gray-500', 'font-semibold');
+                    tab.classList.add('text-white', 'font-bold');
+                    if (tabName === 'open') tab.classList.add('bg-green-600');
+                    else if (tabName === 'closed') tab.classList.add('bg-purple-600');
+                    else tab.classList.add('bg-[#4c00ff]');
+                }
+            });
+        }
+        // Switch tabs and filter data
         function changeTab(status) {
             activeFilter = status;
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('bg-[#4c00ff]', 'text-white');
-                btn.classList.add('text-gray-500');
-            });
-            document.getElementById(`tab-${status}`).classList.add('bg-[#4c00ff]', 'text-white');
-            document.getElementById(`tab-${status}`).classList.remove('text-gray-500');
-            const filtered = status === 'all' ? issues : issues.filter(i => i.status === status);
+            document.getElementById('searchInput').value = '';
+            updateTabUI();
+            const filtered = activeFilter.toLowerCase() === 'all'
+                ? issues
+                : issues.filter(i => i.status.toLowerCase() === activeFilter.toLowerCase());
             renderIssues(filtered);
         }
-        // Labels and priority badges.popup start
+        // ///////////////////////////////////////Modal popup logic //////////////////////////////////////
         function openModal(id) {
             const item = mockData.find(task => task.id === id);
             if (!item) return;
-            // 1. DYNAMIC BORDER COLOR (Matching the Image)
-            const modalContent = document.querySelector('#detailModal > div'); // Select the white card
+            // Set modal border color based on status
+            const modalContent = document.querySelector('#detailModal > div');
             const isOpened = item.status.toLowerCase() === 'open';
-            // Reset classes and add the top border thickness
             modalContent.className = "bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border-t-[6px] transition-all transform scale-100";
-            // Apply specific color: Green (#22c55e) or Purple (#a855f7)
             modalContent.classList.add(isOpened ? 'border-[#22c55e]' : 'border-[#a855f7]');
-            // 2. Core Content
+            // Fill core text content
             document.getElementById('mTitle').textContent = item.title;
             document.getElementById('mDesc').textContent = item.desc;
             document.getElementById('mAuthor').textContent = item.author.toUpperCase();
             document.getElementById('mDate').textContent = item.createdAt;
             document.getElementById('mAssignee').textContent = item.assignee || "NONE";
-            // 3. Status Badge (Green/Purple pill inside modal)
+            // Update status badge pill
             const statusEl = document.getElementById('mStatusBadge');
             statusEl.className = `px-3 py-1 rounded-full font-bold flex items-center gap-1.5 text-white text-[10px] ${isOpened ? 'bg-[#22c55e]' : 'bg-[#a855f7]'}`;
             statusEl.innerHTML = `<span class="w-1.5 h-1.5 bg-white rounded-full"></span> ${item.status.toUpperCase()}`;
-            // 4. Labels (Added icons + Exact image colors)
+            // Render labels with specific styles
             const labelContainer = document.querySelector('.flex.gap-2.mb-6');
             labelContainer.innerHTML = item.labels.map(label => {
                 const text = label.toLowerCase();
-                let style = "";
-                let icon = "";
-                if (text.includes('bug')) {
-                    style = "bg-[#fff0f0] text-[#ff5c5c] border-[#ffd6d6]";
-                } else if (text.includes('help')) {
-                    style = "bg-[#fff4eb] text-[#ff8a35] border-[#ffe0cc]";
-                } else if (text.includes('enhancement')) {
-                    style = "bg-[#ebfaf2] text-[#00c070] border-[#d1f5e3]";
-                } else if (text.includes('first')) {
-                    style = "bg-[#f0f2ff] text-[#6366f1] border-[#e0e4ff]";
-                } else if (text.includes('doc')) {
-                    style = "bg-[#f0f7ff] text-[#0070f3] border-[#d1e9ff]";
-                }
-                return `<span class="${style} px-2.5 py-1 rounded border text-[10px] font-black uppercase flex items-center gap-1.5">
-            <span class="text-[12px]">${icon}</span> ${label}
-        </span>`;
+                let style = "bg-[#f0f7ff] text-[#0070f3] border-[#d1e9ff]"; // Default style
+                if (text.includes('bug')) style = "bg-[#fff0f0] text-[#ff5c5c] border-[#ffd6d6]";
+                else if (text.includes('help')) style = "bg-[#fff4eb] text-[#ff8a35] border-[#ffe0cc]";
+                else if (text.includes('enhancement')) style = "bg-[#ebfaf2] text-[#00c070] border-[#d1f5e3]";
+                else if (text.includes('first')) style = "bg-[#f0f2ff] text-[#6366f1] border-[#e0e4ff]";
+                return `<span class="${style} px-2.5 py-1 rounded border text-[10px] font-black uppercase flex items-center gap-1.5">${label}</span>`;
             }).join('');
-            // 5. Priority Badge (Light background / Solid text)
+            // Set priority badge style
             const priorityEl = document.getElementById('mPriorityBadge');
             const p = item.priority.toLowerCase();
-            let pStyle = "";
-            if (p === 'high') {
-                pStyle = "bg-[#fff0f0] text-[#ff5c5c]";
-            } else if (p === 'medium') {
-                pStyle = "bg-[#fff8e6] text-[#ffb800]";
-            } else {
-                pStyle = "bg-[#f4f6f8] text-[#919eab]";
-            }
+            let pStyle = "bg-[#f4f6f8] text-[#919eab]"; // Default/Low
+            if (p === 'high') pStyle = "bg-[#fff0f0] text-[#ff5c5c]";
+            else if (p === 'medium') pStyle = "bg-[#fff8e6] text-[#ffb800]";
             priorityEl.className = `${pStyle} px-6 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider`;
             priorityEl.textContent = item.priority;
-            // 6. Display Modal
+            // Show modal
             document.getElementById('detailModal').classList.remove('hidden');
         }
+        // Close modal function
         function closeModal() {
             document.getElementById('detailModal').classList.add('hidden');
         }
-        // END
-        // Optional: Close modal when clicking outside the box
-        // 1. Modal click remains the same
+        // Close modal on background click
         document.getElementById('detailModal').addEventListener('click', function (e) {
             if (e.target === this) closeModal();
         });
-        // 2. Define the search logic in one place
-        function handleSearch() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = issues.filter(i =>
-                (activeFilter === 'all' || i.status === activeFilter) &&
-                (i.title.toLowerCase().includes(query) || i.desc.toLowerCase().includes(query))
-            );
-            renderIssues(filtered);
-        }
-        // 3. Listen for Enter key ONLY (removes automatic sync)
-        document.getElementById('searchInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                handleSearch();
-            }
-        });
-        // 4. If you have a physical search button, link it here:
-        // document.getElementById('searchButton').addEventListener('click', handleSearch);
-        // Initial Load
+        // Initial data load and icon setup
         renderIssues(issues);
         lucide.createIcons();
-        //dynamic global search that filters through every field (ID, Title, Description, Status, Labels, etc.)
+        // Main search and auto-tab switching function
         function handleSearch() {
             const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            // 1. Reset if search is empty
             if (!query) {
-                renderIssues(activeFilter === 'all' ? issues : issues.filter(i => i.status === activeFilter));
+                const resetData = (activeFilter.toLowerCase() === 'all')
+                    ? issues
+                    : issues.filter(i => i.status.toLowerCase() === activeFilter.toLowerCase());
+                renderIssues(resetData);
                 return;
             }
+            // 2. Exact ID search (Switches tab automatically)
+            const foundById = issues.find(i => i.id.toString() === query);
+            if (foundById) {
+                activeFilter = foundById.status.toLowerCase();
+                updateTabUI();
+                renderIssues([foundById]);
+                return;
+            }
+            // 3. Global Text Search
             const filtered = issues.filter(item => {
-                const matchesTab = activeFilter === 'all' || item.status === activeFilter;
-                // 1. Check if the query is a number (for ID-only search)
-                const isQueryNumber = !isNaN(query) && query !== '';
-                if (isQueryNumber) {
-                    // STRICT ID MATCH: Only show if ID is exactly the number searched
-                    return matchesTab && item.id.toString() === query;
-                }
-                // 2. BROAD TEXT SEARCH: Search all fields you requested
-                const matchesText =
+                return (
                     item.title.toLowerCase().includes(query) ||
                     item.desc.toLowerCase().includes(query) ||
                     item.status.toLowerCase().includes(query) ||
                     item.priority.toLowerCase().includes(query) ||
                     item.author.toLowerCase().includes(query) ||
-                    item.assignee.toLowerCase().includes(query) ||
-                    item.createdAt.toLowerCase().includes(query) ||
-                    item.updatedAt.toLowerCase().includes(query) ||
-                    item.labels.some(l => l.toLowerCase().includes(query));
-                return matchesTab && matchesText;
+                    (item.assignee && item.assignee.toLowerCase().includes(query)) ||
+                    (item.labels && item.labels.some(l => l.toLowerCase().includes(query)))
+                );
             });
-            renderIssues(filtered);
+            // 4. Update Tab UI for search results
+            if (filtered.length > 0) {
+                const firstMatchStatus = filtered[0].status.toLowerCase();
+                const allSame = filtered.every(i => i.status.toLowerCase() === firstMatchStatus);
+                activeFilter = allSame ? firstMatchStatus : 'all';
+                updateTabUI();
+                renderIssues(filtered);
+            } else {
+                renderIssues([]);
+            }
         }
     </script>
 </body>
